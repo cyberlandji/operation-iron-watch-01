@@ -1,0 +1,57 @@
+# =========================================
+# Operation Iron Watch 01 - SOC Git Policy
+# =========================================
+
+# -------------------------
+# Logs & Raw Data
+# -------------------------
+*.log
+logs/
+raw_logs/
+*.pcap
+*.pcapng
+
+# Raw evidence (only sanitized evidence should be pushed)
+evidences/raw/
+evidences/tmp/
+
+# -------------------------
+# Snort Runtime Files
+# -------------------------
+alert
+snort.log.*
+*.ids
+
+# -------------------------
+# Virtual Machine Files
+# -------------------------
+*.vdi
+*.vmdk
+*.ova
+*.ovf
+*.qcow2
+
+# -------------------------
+# SSH / Sensitive Files
+# -------------------------
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# -------------------------
+# Archives / Large Files
+# -------------------------
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# -------------------------
+# Editor / System Files
+# -------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
