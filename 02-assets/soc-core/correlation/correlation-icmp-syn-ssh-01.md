@@ -88,7 +88,7 @@ date
 # SSH Login  → Access attempt (network + host visibility)
 
 # This confirms layered detection capability:
-# - Network evidence (pcap)
+# - Network evidence
 # - Detection rule alerts
 # - Host authentication logs
 # ============================================================
