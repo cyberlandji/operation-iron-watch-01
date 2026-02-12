@@ -98,3 +98,75 @@ It is focused on:
 
 Every test scenario must begin from a clean detection state.
 
+
+---
+
+# Threat Model Overview — Operation Iron Watch 01
+
+## 1. Objective
+
+The threat model for Iron Watch 01 is intentionally limited.
+
+This campaign does not simulate advanced persistent threats.
+
+It focuses on validating defensive visibility against common attacker behaviors.
+
+---
+
+## 2. Threat Actor Profiles
+
+### Internal Opportunistic Attacker
+Source: redforge-02 (Host-Only)
+Capabilities:
+- ICMP probing
+- Port scanning (Nmap)
+- SSH connection attempts
+
+Goal:
+Test detection reliability in a controlled environment.
+
+---
+
+### LAN-Based Attacker
+Source: redforge-01 (Bridged)
+Capabilities:
+- Enumeration
+- Service discovery
+- SSH access attempts
+
+Goal:
+Compare detection signals under realistic LAN exposure.
+
+---
+
+## 3. Assets at Risk
+
+Primary asset:
+- soc-core (Detection Node)
+
+Exposed Services (when enabled):
+- SSH
+- Open test ports (if configured for detection validation)
+
+---
+
+## 4. Assumptions
+
+- No internet-based attacker in this phase
+- No malware deployment
+- No lateral movement simulation
+- No privilege escalation scenarios
+
+---
+
+## 5. Defensive Objective
+
+Iron Watch 01 validates:
+
+- Traffic visibility
+- Snort alert triggering
+- Log ingestion reliability
+- Manual correlation accuracy
+
+Only after validation is complete will more advanced scenarios be introduced.
+
