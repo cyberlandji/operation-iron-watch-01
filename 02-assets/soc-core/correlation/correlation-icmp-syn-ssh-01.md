@@ -166,5 +166,9 @@ When -sS is executed without root, Nmap automatically falls back to TCP connect 
 
 This resulted in full TCP handshakes and application-layer logging.
 
+### Evidence – Attacker Commands (redforge-02)
+
+![Redforge Commands](../04-evidences/corr-01-icmp-syn-ssh/corr-redforge-commands.png)
+
 
 
