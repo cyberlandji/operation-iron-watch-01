@@ -1,0 +1,21 @@
+# redforge-01 — VM Settings (VirtualBox)
+
+## Role
+External Exposure Attacker (realistic LAN scenario)
+
+## OS
+Kali Linux
+
+## Resources
+- RAM: 4 GB
+- CPU: 2 vCPU
+- Disk: (your chosen size)
+
+## Networking
+Adapter 1: Bridged
+- Purpose: simulate attacker on real LAN (Gigacube network)
+- Use only for controlled, explicitly scoped tests against your own assets
+
+## Notes
+- This node is not required for early isolated scenarios
+- Use it later to compare logs: isolated (redforge-02) vs LAN exposure (redforge-01)
