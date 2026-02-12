@@ -150,4 +150,21 @@ sudo grep 192.168.56.5 /var/log/auth.log
 # Discovery → Enumeration → Access Attempt
 # ============================================================
 
+## Scan Type Observation
+
+During analysis, no RST packets were observed after SYN/ACK responses.
+
+Instead, the following pattern was recorded:
+
+SYN → SYN/ACK → ACK
+
+This indicates a full TCP connect scan (-sT), not a stealth SYN scan (-sS).
+
+Reason:
+The nmap command was executed without root privileges.
+When -sS is executed without root, Nmap automatically falls back to TCP connect scan.
+
+This resulted in full TCP handshakes and application-layer logging.
+
+
 
