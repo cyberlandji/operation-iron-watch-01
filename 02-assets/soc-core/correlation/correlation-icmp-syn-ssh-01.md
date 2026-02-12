@@ -1,4 +1,3 @@
-
 # ============================================================
 # SOC-CORE CORRELATION CASE 01
 # ICMP → TCP CONNECT SCAN → SSH LOGIN ATTEMPT
@@ -6,10 +5,6 @@
 # Case ID: SOC-CORE-CORR-01
 # Attacker: redforge-02 (192.168.56.5)
 # Defender: soc-core (192.168.56.4)
-# Detection Engine: Snort (console + PCAP logging)
-# Log Sources:
-#   - /var/log/snort/snort.log.*
-#   - /var/log/auth.log
 # ============================================================
 
 
@@ -20,21 +15,33 @@
 # Action performed on redforge-02:
 # ping 192.168.56.4
 
-# On soc-core – verify ICMP traffic in PCAP logs
+# On soc-core – verify ICMP traffic
 cd /var/log/snort
 sudo tcpdump -nn -r snort.log.* icmp
 
-# Expected observation:
+# Expected:
 # 192.168.56.5 > 192.168.56.4: ICMP echo request
 # 192.168.56.4 > 192.168.56.5: ICMP echo reply
 
-# Check host authentication logs (should be empty)
+# Host authentication log check (should return nothing)
 sudo grep 192.168.56.5 /var/log/auth.log
+
+
+# -----------------------------
+# Evidence – ICMP
+# -----------------------------
+# Screenshot:
+# ../04-evidences/corr-01-icmp-syn-ssh/corr-icmp.png
+#
+# Markdown reference (outside this bash block):
+
+# ![ICMP Evidence](../04-evidences/corr-01-icmp-syn-ssh/corr-icmp.png)
+
 
 # Interpretation:
 # ICMP confirms host discovery.
 # Visible at network layer only.
-# No application-layer interaction triggered.
+# No application-layer logging triggered.
 
 
 # ============================================================
@@ -44,39 +51,42 @@ sudo grep 192.168.56.5 /var/log/auth.log
 # Action performed on redforge-02:
 # nmap -sS 192.168.56.4
 #
-# Note:
-# Command executed without root privileges.
-# Because -sS requires root, Nmap automatically fell back to:
-# TCP Connect Scan (-sT).
+# Executed without root privileges.
+# Nmap automatically fell back to TCP connect scan (-sT).
 
 # On soc-core – inspect port 22 traffic
 sudo tcpdump -nn -r snort.log.* port 22
 
-# Observed TCP flag sequence:
+# Observed TCP sequence:
 # SYN → SYN/ACK → ACK
 
-# Example pattern:
+# Example:
 # 192.168.56.5:50706 > 192.168.56.4:22  Flags [S]
 # 192.168.56.4:22 > 192.168.56.5:50706  Flags [S.]
 # 192.168.56.5:50706 > 192.168.56.4:22  Flags [.]
 
 
-# Optional verification: check for RST packets
+# Optional verification (RST check)
 sudo tcpdump -nn -r snort.log.* 'tcp[tcpflags] & tcp-rst != 0' | grep 192.168.56.5
 
-# Result:
-# No RST observed → confirms NOT a stealth SYN scan.
+# No RST observed → confirms TCP connect scan.
 
-# Check host logs
-sudo grep 192.168.56.5 /var/log/auth.log
 
-# Expected:
-# No authentication attempts during scan phase.
+# -----------------------------
+# Evidence – SYN / TCP Connect
+# -----------------------------
+# Screenshot:
+# ../04-evidences/corr-01-icmp-syn-ssh/corr-syn.png
+#
+# Markdown reference (outside this bash block):
+
+# ![TCP Connect Scan Evidence](../04-evidences/corr-01-icmp-syn-ssh/corr-syn.png)
+
 
 # Interpretation:
-# Full TCP handshake confirms TCP connect scan behavior.
-# Port 22 confirmed open.
-# SSH daemon reachable but no credentials used yet.
+# Full TCP handshake confirms TCP connect scan.
+# Port 22 reachable.
+# No authentication yet.
 
 
 # ============================================================
@@ -86,22 +96,32 @@ sudo grep 192.168.56.5 /var/log/auth.log
 # Action performed on redforge-02:
 # ssh socadmin@192.168.56.4
 
-# On soc-core – inspect port 22 traffic again
+# On soc-core – inspect SSH traffic
 sudo tcpdump -nn -r snort.log.* port 22
 
-# Observed:
+# Full handshake observed:
 # SYN → SYN/ACK → ACK
-# Followed by encrypted SSH session traffic.
 
-# Check host authentication logs
+# Host authentication logs
 sudo grep 192.168.56.5 /var/log/auth.log
 
 # Observed:
 # pam_unix(sshd:auth): authentication failure
 # Failed password for socadmin from 192.168.56.5
 
+
+# -----------------------------
+# Evidence – SSH Authentication Failure
+# -----------------------------
+# Screenshot:
+# ../04-evidences/corr-01-icmp-syn-ssh/corr-ssh-failure.png
+#
+# Markdown reference (outside this bash block):
+
+# ![SSH Failure Evidence](../04-evidences/corr-01-icmp-syn-ssh/corr-ssh-failure.png)
+
+
 # Interpretation:
-# Full TCP handshake established.
 # SSH daemon engaged.
 # Authentication failure logged.
 # Application-layer interaction confirmed.
@@ -113,41 +133,21 @@ sudo grep 192.168.56.5 /var/log/auth.log
 
 # ICMP:
 #   Network visibility: YES
-#   Host log visibility: NO
+#   Host visibility: NO
 #   Classification: Host Discovery
 
 # TCP Connect Scan:
 #   Network visibility: YES
-#   Host log visibility: NO
+#   Host visibility: NO
 #   Classification: Port Enumeration
 
 # SSH Login Attempt:
 #   Network visibility: YES
-#   Host log visibility: YES
+#   Host visibility: YES
 #   Classification: Access Attempt
 
-
-# ============================================================
-# KEY TECHNICAL OBSERVATION
-# ============================================================
-
-# Because nmap -sS was executed without root:
-#   - Stealth SYN scan was not performed.
-#   - Nmap defaulted to TCP connect scan (-sT).
-#   - Full TCP handshakes observed (ACK instead of RST).
-#   - Increased host-level visibility.
-
-
-# ============================================================
-# DETECTION CAPABILITY VALIDATION
+# Attacker workflow confirmed:
+# Discovery → Enumeration → Access Attempt
 # ============================================================
 
-# SOC-Core successfully demonstrated:
-#   - Packet-level visibility (Snort PCAP logs)
-#   - IDS detection output (console alerts)
-#   - Host authentication logging (auth.log)
-#   - Timeline alignment across layers
 
-# Correlation confirms structured attacker workflow:
-#   Discovery → Enumeration → Access Attempt
-# ============================================================
