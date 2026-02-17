@@ -149,4 +149,32 @@
 #  than to simulate complex environments without clarity."
 #
 # ============================================================
+#
+# ============================================================
+# Evidence Gap Identified
+# ============================================================
+#
+# During post-analysis, it was identified that system logs
+# from /var/log were not preserved at the time of execution.
+#
+# As a result, analysis relied on live observation and command
+# output rather than retained log artifacts.
+#
+# This gap is documented and addressed in later operations.
+#
+# ============================================================
 
+#
+# ============================================================
+# Correlation Scope Clarification
+# ============================================================
+#
+# Correlation during Operation Iron Watch 01 was performed
+# primarily using network-based alerts (Snort) and live
+# attacker observations. Host-based log artifacts from
+# /var/log were not preserved.
+#
+# This clarified the importance of multi-source visibility
+# for future operations.
+#
+# ============================================================
