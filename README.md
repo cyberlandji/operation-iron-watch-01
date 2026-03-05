@@ -1,251 +1,134 @@
-# Operation Iron Watch 01
-Tactical Blue-Team Campaign (Hybrid Model)
+# 🔐 Operation Iron Watch 01
+## Foundational SOC — Snort IDS & Manual Correlation
 
-## Mission
-Operation Iron Watch 01 establishes the foundational defensive monitoring framework of Sentinel SOC Lab.
+[![Status](https://img.shields.io/badge/status-complete-brightgreen)](https://github.com/cyberlandji/operation-iron-watch-01)
+[![Lab Series](https://img.shields.io/badge/series-Operation%20Iron%20Watch-blue)](https://github.com/cyberlandji)
+[![Focus](https://img.shields.io/badge/focus-Snort%20IDS%20%26%20Detection%20Baseline-teal)](https://github.com/cyberlandji/operation-iron-watch-01)
 
-Goal:
-- Validate network visibility
-- Validate Snort-based detection
-- Build manual correlation discipline (pre-SIEM)
+---
 
-## Scope (Assets)
-- soc-core (Ubuntu Server 22.04, detection node)
-- redforge-02 (isolated internal attacker: Host-Only + NAT)
+## 📌 Overview
 
-## Detection Stack
-- Snort IDS (primary detection)
-- Manual correlation (Snort live detection + auth.log)
+Operation Iron Watch 01 establishes the **foundational detection baseline** of the Iron Watch lab series.
 
-## Repository Map
-- `01-architecture/` — topology & network modes
-- `02-assets/` — VM settings (VirtualBox) and baseline notes
-- `03-campaign-scenario/` — SOC node configs, detection, correlation
-- `04-evidence/` — logs + screenshots
-- `05-lessons/` — lessons learned per phase
+Before introducing a SIEM, before automating correlation, before adding complexity — this operation answers a fundamental question: *can we reliably detect early-stage attacker behavior using only Snort IDS and manual log analysis?*
 
+The environment was intentionally kept **noise-free and controlled** to clearly distinguish attacker signals from background activity. No benign traffic interference. No complex correlation. Just clean, observable attacker behavior against a known baseline.
 
-# ============================================================
-# Operation Iron Watch 01
-# MITRE ATT&CK Mapping (Post-Analysis)
-# ============================================================
-#
-# Scope & Transparency
-# --------------------
-# - MITRE ATT&CK mapping was applied retrospectively
-# - Only observed activity is mapped
-# - No successful compromise occurred
-# - No incident response actions were performed
-#
-# Lab Characteristics
-# -------------------
-# - Two virtual machines on the same physical host
-# - Host-only network for attacker/defender interaction
-# - NAT used only for system updates
-# - Intentionally noise-free environment
-#
-# Objective
-# ---------
-# Establish a clear baseline understanding of early-stage
-# attacker behavior (signal) before introducing noise,
-# correlation, or response workflows in later operations.
-#
-# ============================================================
-# Observed Activity Summary
-# ============================================================
-#
-# The attacker activity observed during Operation Iron Watch 01
-# was limited to:
-#
-# - Host availability probing (ICMP)
-# - Network service discovery (TCP connect scan)
-# - Failed authentication attempts (SSH)
-#
-# No privilege escalation, persistence, execution, or lateral
-# movement was observed.
-#
-# ============================================================
-# MITRE ATT&CK Mapping (Enterprise)
-# ============================================================
-#
-# NOTE:
-# Mapping reflects ATTEMPTED or OBSERVED behavior only.
-# Success is NOT required for ATT&CK classification.
-#
-# ------------------------------------------------------------
-# Observed Action: ICMP ping
-# Tactic: Reconnaissance
-# Technique: Active Scanning
-# Status: Observed
-# Analyst Note:
-# Ping was used to confirm target host availability prior to
-# further probing.
-#
-# ------------------------------------------------------------
-# Observed Action: nmap TCP connect scan (-sT)
-# Tactic: Reconnaissance
-# Technique: Network Service Discovery
-# Status: Observed
-# Analyst Note:
-# Default TCP connect scan indicates lack of sudo / raw socket
-# privileges. No stealth scanning (-sS) was performed.
-#
-# ------------------------------------------------------------
-# Observed Action: SSH login attempts
-# Tactic: Initial Access
-# Technique: Valid Accounts
-# Status: Attempted - Failed
-# Analyst Note:
-# Authentication attempts failed. No credentials obtained and
-# no access granted.
-#
-# ============================================================
-# Techniques Explicitly NOT Observed
-# ============================================================
-#
-# - Execution
-# - Persistence
-# - Privilege Escalation
-# - Lateral Movement
-# - Defense Evasion
-# - Command and Control
-#
-# ============================================================
-# Analyst Assessment
-# ============================================================
-#
-# The observed activity is consistent with an opportunistic or
-# low-sophistication attacker:
-#
-# - No stealth techniques
-# - No privilege awareness (no sudo usage)
-# - No adaptation after authentication failure
-#
-# The purpose of Operation Iron Watch 01 was not to simulate a
-# production SOC environment, but to build foundational
-# detection understanding in a clean and controlled setting.
-#
-# ============================================================
-# Progression
-# ============================================================
-## Operation Iron Watch 01 establishes a clean detection baseline.
-# Future operations (e.g. Iron Watch 02) intentionally introduce:
-#
-# - Background noise and routine benign activity
-# - Mixed benign and malicious traffic
-# - Increased correlation complexity
-# - Deeper investigation and response workflows
-#
+---
 
-# NOTE: This operation was conducted in a low-noise environment
-# to clearly observe early-stage attacker behavior.
-# ============================================================
+## 🎯 Objectives
 
+- Validate network visibility on the SOC detection node
+- Validate Snort-based detection against real attacker activity
+- Build manual correlation discipline before SIEM integration
+- Establish a clean detection baseline for future operations
 
-# ============================================================
-# Detection Opportunities
-# Operation Iron Watch 01
-# ============================================================
-#
-# NOTE:
-# The environment was intentionally noise-free.
-# Detection ideas are derived from observed behavior only.
-#
-# ============================================================
-# Detection Idea 1: ICMP Host Discovery
-# ============================================================
-#
-# Description:
-# Detect ICMP echo requests used to confirm host availability.
-#
-# Signals:
-# - ICMP echo-request packets
-# - Single or repeated probes to internal hosts
-#
-# Analyst Context:
-# - A single ping is weak on its own
-# - Ping followed by scanning increases confidence
-#
-# SOC Value:
-# Early indicator of reconnaissance activity, especially useful
-# for detecting insider movement or pivot attempts.
-#
-# ============================================================
-# Detection Idea 2: TCP Connect Port Scanning
-# ============================================================
-#
-# Description:
-# Detect TCP connect scans generated without raw socket access.
-#
-# Signals:
-# - Multiple full TCP handshakes
-# - Sequential or patterned destination ports
-#
-# Analyst Context:
-# - Indicates low-privilege or low-skill attacker
-# - Common in opportunistic attacks and misconfigured tools
-#
-# SOC Value:
-# Identifies reconnaissance even when stealth techniques
-# are not used.
-#
-# ============================================================
-# Detection Idea 3: Failed SSH Authentication Attempts
-# ============================================================
-#
-# Description:
-# Detect repeated SSH authentication failures from a single source.
-#
-# Signals:
-# - "Failed password" or authentication failure logs
-# - No successful login events
-#
-# Analyst Context:
-# - Represents attempted initial access
-# - Often precedes either abandonment or escalation attempts
-#
-# SOC Value:
-# Early detection of credential probing activity.
-#
-# ============================================================
+---
 
+## 🖥️ Lab Infrastructure
 
-# ============================================================
-# Observed Attack Flow (Kill Chain View)
-# Operation Iron Watch 01
-# ============================================================
-#
-# This flow represents ONLY what was observed.
-# No stages beyond failed initial access occurred.
-#
-# ------------------------------------------------------------
-#
-# [Attacker VM]
-#      |
-#      |  ICMP Echo Request
-#      v
-# [Target VM]
-#      |
-#      |  TCP Connect Scan (-sT)
-#      |  Multiple destination ports
-#      v
-# [Service Enumeration]
-#      |
-#      |  SSH Authentication Attempts
-#      |  (Invalid credentials)
-#      v
-# [Access Denied]
-#
-# ------------------------------------------------------------
-#
-# Analyst Notes:
-# - Ping confirmed host availability
-# - Nmap scan identified exposed services
-# - SSH login attempts failed
-# - Attack chain terminated naturally
-#
-# No execution, persistence, privilege escalation,
-# or lateral movement was observed.
-#
-# ============================================================
+| Host | Role | Network |
+|------|------|---------|
+| `soc-core` | Ubuntu Server 22.04 — detection node | Host-Only |
+| `redforge-02` | Isolated attacker VM | Host-Only + NAT (updates only) |
+
+> Both VMs run on the same physical host. NAT was used exclusively for system updates — never for attack traffic.
+
+---
+
+## 🛠️ Detection Stack
+
+| Tool | Role |
+|------|------|
+| Snort IDS | Primary detection — network-level alerts |
+| auth.log | Host-level authentication event monitoring |
+| Manual correlation | Analyst-driven — no SIEM in this operation |
+
+---
+
+## 🔍 Observed Activity
+
+All attacker activity observed during IW01 was limited to early-stage reconnaissance and failed initial access. No compromise occurred.
+
+| Activity | Description |
+|----------|-------------|
+| ICMP Host Discovery | Ping used to confirm target availability before further probing |
+| TCP Connect Scan (-sT) | Full TCP handshake scan — indicates low-privilege attacker (no raw socket access) |
+| SSH Authentication Attempts | Repeated failed login attempts — no credentials obtained, no access granted |
+
+> The absence of stealth techniques (no `-sS` scan, no sudo usage) is itself an indicator — consistent with a low-sophistication or opportunistic attacker profile.
+
+---
+
+## 🗺️ MITRE ATT&CK Mapping
+
+| Technique | Tactic | Status |
+|-----------|--------|--------|
+| Active Scanning | Reconnaissance | ✅ Observed |
+| Network Service Discovery | Reconnaissance | ✅ Observed |
+| Valid Accounts (SSH) | Initial Access | ⚠️ Attempted — Failed |
+
+**Techniques NOT observed:** Execution, Persistence, Privilege Escalation, Lateral Movement, Defense Evasion, Command & Control.
+
+---
+
+## 🔗 Attack Flow
+
+```
+[redforge-02]
+     │
+     │  ICMP Echo Request → confirm host availability
+     ▼
+[soc-core]
+     │
+     │  TCP Connect Scan (-sT) → service enumeration
+     ▼
+[Service Discovery]
+     │
+     │  SSH Authentication Attempts → failed, no access granted
+     ▼
+[Access Denied — Attack Chain Terminated]
+```
+
+---
+
+## 📂 Structure
+
+```
+operation-iron-watch-01/
+├── 01-architecture/        # Network topology & VM modes
+├── 02-assets/              # VM settings and baseline notes
+├── 03-campaign-scenario/   # SOC node configs, detection, correlation
+├── 04-evidences/           # Logs and screenshots
+├── 05-lessons-learned/     # Lessons per phase
+└── README.md
+```
+
+---
+
+## 🏁 Key Takeaway
+
+IW01 proves that **early-stage attacker behavior is detectable** even without a SIEM — if the right tools are in place and the analyst knows what to look for. Manual correlation is slow but it forces deep understanding of what each log entry actually means.
+
+> The limitation IW01 exposes: manual correlation does not scale. The next step is a SIEM.
+
+---
+
+## 🔗 Iron Watch Series
+
+| Episode | Focus | Status |
+|---------|-------|--------|
+| **Iron Watch 01** | **Foundational SOC — Snort IDS, manual correlation** | ✅ Complete |
+| [Iron Watch 02](https://github.com/cyberlandji/operation-iron-watch-02) | Graylog SIEM — web enumeration detection, real SSH compromise | ✅ Complete |
+| [Iron Watch 03](https://github.com/cyberlandji/operation-iron-watch-03) | DMZ hardening, log pipeline, DDoS detection suite | 🔄 In Progress |
+| Iron Watch 04 | Attack validation — Kali recon & initial access against IW03 | 🔜 Planned |
+
+---
+
+## 👤 Author
+
+**cyberlandji** — Blue Team Practitioner | ISC2 CC | CompTIA Security+ (in progress)
+
+Portfolio: [cyberlandji.com](https://cyberlandji.com) · GitHub: [github.com/cyberlandji](https://github.com/cyberlandji)
 
